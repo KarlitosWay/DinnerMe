@@ -2,7 +2,8 @@
 {
     abstract public class Meal
     {
-        public string title { get; set; }
+        public string name { get; set; }
+
         public string imageUrl { get; set; }
 
         // Stores the method used by the recipe

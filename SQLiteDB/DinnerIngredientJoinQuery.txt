@@ -1,0 +1,8 @@
+      SELECT "d"."Id", "d"."category", "d"."imageUrl", "d"."method", "d"."name", "d"."notes", "t"."dinnersId", "t"."ingredientsId", "t"."Id", "t"."imageUrl", "t"."name", "t"."quantity"
+      FROM "dinners" AS "d"
+      LEFT JOIN (
+          SELECT "d0"."dinnersId", "d0"."ingredientsId", "i"."Id", "i"."imageUrl", "i"."name", "i"."quantity"
+          FROM "DinnerIngredient" AS "d0"
+          INNER JOIN "ingredients" AS "i" ON "d0"."ingredientsId" = "i"."Id"
+      ) AS "t" ON "d"."Id" = "t"."dinnersId"
+      ORDER BY "d"."Id", "t"."dinnersId", "t"."ingredientsId"

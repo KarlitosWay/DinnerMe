@@ -8,7 +8,7 @@ namespace DinnerMe.Model
         public enum Category { Fish, Vegetarian, Chicken, Beef, Pasta, Rice, Asian}
 
         // Unique identifier for the instance, required by the ORM (EntityFramework) / database
-        public int dinnerId { get; set; }
+        public int Id { get; set; }
 
         public Category category { get; set; }
 

@@ -12,7 +12,8 @@
         // Annotated notes on the method (not sure how to implement this yet)
         public string notes { get; set; }
 
-        public List<Ingredient> ingredients = new List<Ingredient>();
+        // A meal can have one or more ingredients
+        public List<Ingredient> ingredients { get; set; } = new List<Ingredient>();
 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
 using DinnerMe.Model;
+using System.Reflection.Metadata;
 
 
 /**
@@ -25,6 +26,31 @@ namespace DinnerMe.Data
         }
 
         public DbSet<Dinner> dinners { get; set; }
+
+        public DbSet<Ingredient> ingredients { get; set; }
+
+        public DbSet<Side> sides { get; set; }
+
+        /*
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Dinner>().HasMany(e => e.ingredients)
+                                         .WithOne(e => e.)
+
+            modelBuilder.Entity<Blog>()
+                    .HasMany(e => e.Posts)
+                    .WithOne(e => e.Blog)
+                    .HasForeignKey(e => e.BlogId)
+                    .HasPrincipalKey(e => e.Id);
+
+            // Configuring a many-to-many special -> topping relationship that is friendly for serialization
+            modelBuilder.Entity<PizzaTopping>().HasKey(pst => new { pst.PizzaId, pst.ToppingId });
+            modelBuilder.Entity<PizzaTopping>().HasOne<Pizza>().WithMany(ps => ps.Toppings);
+            modelBuilder.Entity<PizzaTopping>().HasOne(pst => pst.Topping).WithMany();
+        }
+        */
     }
 
 }

@@ -1,7 +1,45 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
 
-<h1>Hello, world!</h1>
+@using DinnerMe.Model;
 
-Welcome to your new app.
+
+<PageTitle>DinnerMe</PageTitle>
+
+<h1>Checking database contents...</h1>
+
+
+<div class="main">
+    <ul >
+        @if (dinners != null)
+        {
+            @foreach (var dinner in dinners)
+            {
+                <li style="background-image: url('@dinner.imageUrl')">
+                    <div>
+                        <span class="title">@dinner.name</span>
+                        @foreach (var side in dinner.sides)
+                        {
+                            <span> @side.name </span>
+                        }
+                        @foreach (var ingredient in dinner.ingredients)
+                        {
+                            <span> @ingredient.name </span>
+                        }
+                    </div>
+                </li>
+            }
+        }
+    </ul>
+</div>
+
+@code {
+    List<Dinner> dinners = new List<Dinner>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        dinners = await HttpClient.GetFromJsonAsync<List<Dinner>>(NavigationManager.BaseUri + "dinners");
+    }
+}

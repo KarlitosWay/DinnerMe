@@ -5,7 +5,7 @@ namespace DinnerMe.Model
     public class Side : Meal
     {
         // Unique identifier for the instance, required by the ORM (EntityFramework) / database
-        public int sideId { get; set; }
+        public int Id { get; set; }
     }
 
 }

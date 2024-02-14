@@ -1,0 +1,33 @@
+﻿@page "/meals"
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+@using DinnerMe.Model;
+
+
+
+<div class="main">
+        <ul class="meal-cards">
+        @if (dinners != null)
+        {
+            @foreach (var dinner in dinners)
+            {
+                <li style="background-image: url('@dinner.imageUrl')">
+                    <div class="meal-info">
+                        <span class="title">@dinner.name</span>
+                    </div>
+                </li>
+            }
+        }
+    </ul>
+</div>
+
+@code {
+    List<Dinner> dinners = new List<Dinner>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        dinners = await HttpClient.GetFromJsonAsync<List<Dinner>>(NavigationManager.BaseUri + "dinners");
+    }
+}

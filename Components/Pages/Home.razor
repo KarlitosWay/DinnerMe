@@ -6,40 +6,7 @@
 @using DinnerMe.Model;
 
 
-<PageTitle>DinnerMe</PageTitle>
+<PageTitle>This weeks dinner selection</PageTitle>
 
-<h1>Checking database contents...</h1>
+<h1>The menu for the week will go here :-)</h1>
 
-
-<div class="main">
-    <ul >
-        @if (dinners != null)
-        {
-            @foreach (var dinner in dinners)
-            {
-                <li style="background-image: url('@dinner.imageUrl')">
-                    <div>
-                        <span class="title">@dinner.name</span>
-                        @foreach (var side in dinner.sides)
-                        {
-                            <span> @side.name </span>
-                        }
-                        @foreach (var ingredient in dinner.ingredients)
-                        {
-                            <span> @ingredient.name </span>
-                        }
-                    </div>
-                </li>
-            }
-        }
-    </ul>
-</div>
-
-@code {
-    List<Dinner> dinners = new List<Dinner>();
-
-    protected override async Task OnInitializedAsync()
-    {
-        dinners = await HttpClient.GetFromJsonAsync<List<Dinner>>(NavigationManager.BaseUri + "dinners");
-    }
-}

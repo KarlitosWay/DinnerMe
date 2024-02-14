@@ -7,13 +7,25 @@
     <base href="/" />
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" href="app.css" />
-    <link rel="stylesheet" href="DinnerMe.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
 </head>
 
 <body>
-    <Routes />
+    <!--
+        In .NET 8  static rendering is the default.
+        .NET8 introduced the notion of Render Modes and it is now required either at the page level or globally.
+        https://stackoverflow.com/questions/58196812/blazor-onclick-event-is-not-triggered
+    -->
+    <Routes @rendermode=RenderMode.InteractiveServer />
+
+    <!-- Error displayed only if blazor-error-ui defined in CSS has its display set to block by framework on error -->
+    <div id="blazor-error-ui">
+            An error has occurred. This application may no longer respond until reloaded.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
     <script src="_framework/blazor.web.js"></script>
 </body>
 

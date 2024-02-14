@@ -18,8 +18,7 @@ builder.Services.AddSqlite<DinnerMeContext>("Data Source=SQLiteDB/dinnerme.db");
 // an "unable to find the required services" exception
 builder.Services.AddControllersWithViews();
 
-// TODO, added this because JSON couldn't handle the many-to-many relationship between Model.Dinner and Model.Ingredient.
-// Is this really the best way or is my model broken?
+// Note: Added this because JSON couldn't handle the many-to-many relationship between Model.Dinner and Model.Ingredient.
 // See https://stackoverflow.com/questions/59199593/net-core-3-0-possible-object-cycle-was-detected-which-is-not-supported
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);

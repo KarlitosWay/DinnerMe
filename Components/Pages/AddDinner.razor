@@ -1,0 +1,99 @@
+﻿@page "/adddinner"
+
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+@using DinnerMe.Model
+
+
+<h3>Add Dinner</h3>
+
+<div>
+    <EditForm EditContext=@editContext OnValidSubmit=Add>
+        <DataAnnotationsValidator />
+
+        <div class="form-field">
+            <label>Name:</label>
+            <div>
+                <InputText @bind-Value="newDinner.name" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Mneumonic:</label>
+            <div>
+                <InputText @bind-Value="newDinner.mneumonic" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Method:</label>
+            <div>
+                <InputText @bind-Value="newDinner.method" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Notes:</label>
+            <div>
+                <InputText @bind-Value="newDinner.notes" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="body">Select categories: </label>
+
+            @foreach (var category in categories)
+            {
+                <InputCheckbox @bind-Value=category.selected />
+                @category.name
+            }
+
+        </div>
+
+
+        <button type="Submit">
+            Add dinner
+        </button>
+    </EditForm>
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="error-message">@errorMessage</div>
+    }
+</div>
+
+@code {
+    private EditContext editContext;
+    private Dinner newDinner = new Dinner();
+    private List<Category> categories = new List<Category>();
+
+    private string errorMessage;
+    private bool temp;
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await HttpClient.GetFromJsonAsync<List<Category>>(NavigationManager.BaseUri + "dinners/getcategories");
+    }
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(newDinner);
+
+        base.OnInitialized();
+    }
+
+    private async Task Add()
+    {
+        var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}dinners", newDinner);
+
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/browsemeals");
+        }
+        else
+        {
+            // Handle error
+            errorMessage = "ERROR: Failed to add dinner. Response: " + await response.Content.ReadAsStringAsync();
+        }
+    }
+}

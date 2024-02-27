@@ -4,6 +4,10 @@
     {
         public string name { get; set; }
 
+        // Not quite a description, used a short meal mneumonic
+        public string mneumonic { get; set; }
+
+        // Path to image representing the meal
         public string imageUrl { get; set; }
 
         // Stores the method used by the recipe

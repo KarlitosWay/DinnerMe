@@ -1,4 +1,0 @@
-SELECT "d"."Id", "d"."category", "d"."imageUrl", "d"."method", "d"."name", "d"."notes", "s"."Id", "s"."DinnerId", "s"."imageUrl", "s"."method", "s"."name", "s"."notes"
-      FROM "dinners" AS "d"
-      LEFT JOIN "sides" AS "s" ON "d"."Id" = "s"."DinnerId"
-      ORDER BY "d"."Id"

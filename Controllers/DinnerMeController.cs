@@ -14,18 +14,18 @@ namespace DinnerMe.Controllers
     [ApiController]
     public class DinnerMeController : Controller
     {
-        private readonly DinnerMeContext _db;
+        private readonly DinnerMeContext dinnerMeContext;
 
         public DinnerMeController(DinnerMeContext db)
         {
-            _db = db;
+            dinnerMeContext = db;
         }
 
-        [HttpGet]
+        [HttpGet("getdinners")]
         public async Task<ActionResult<List<Dinner>>> GetDinners()
         {
             // Just Dinners
-            return (await _db.dinners.ToListAsync()).OrderByDescending(d => d.name).ToList();
+            return (await dinnerMeContext.dinners.ToListAsync()).OrderByDescending(d => d.name).ToList();
 
             // Dinners joined with sides
             //return (await _db.dinners.Include(d => d.sides).ToListAsync()).OrderByDescending(d => d.name).ToList();
@@ -37,6 +37,20 @@ namespace DinnerMe.Controllers
             //return (await _db.dinners.Include(d => d.sides).Include(d => d.ingredients).ToListAsync()).OrderByDescending(d => d.name).ToList();
         }
 
+        [HttpGet("getcategories")]
+        public async Task<ActionResult<List<Category>>> GetCategories()
+        {
+            return (await dinnerMeContext.categories.ToListAsync()).OrderByDescending(c => c.name).ToList();
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<int>> AddDinner(Dinner dinner)
+        {
+            dinnerMeContext.dinners.Attach(dinner);
+            await dinnerMeContext.SaveChangesAsync();
+
+            return dinner.Id;
+        }
     }
 
 }

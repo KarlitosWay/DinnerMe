@@ -1,4 +1,4 @@
-﻿@page "/meals"
+﻿@page "/browsemeals"
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
@@ -16,6 +16,7 @@
                 <li style="background-image: url('@dinner.imageUrl')">
                     <div class="meal-info">
                         <span class="title">@dinner.name</span>
+                        @dinner.mneumonic
                     </div>
                 </li>
             }
@@ -28,6 +29,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        dinners = await HttpClient.GetFromJsonAsync<List<Dinner>>(NavigationManager.BaseUri + "dinners");
+        dinners = await HttpClient.GetFromJsonAsync<List<Dinner>>(NavigationManager.BaseUri + "dinners/getdinners");
     }
 }

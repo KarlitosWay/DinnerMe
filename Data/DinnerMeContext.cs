@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
 using DinnerMe.Model;
-using System.Reflection.Metadata;
 
 
 /**
@@ -26,6 +25,8 @@ namespace DinnerMe.Data
         }
 
         public DbSet<Dinner> dinners { get; set; }
+
+        public DbSet<Category> categories { get; set; }
 
         public DbSet<Ingredient> ingredients { get; set; }
 

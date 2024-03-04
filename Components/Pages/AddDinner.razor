@@ -11,6 +11,7 @@
 <div>
     <EditForm EditContext=@editContext OnValidSubmit=Add>
         <DataAnnotationsValidator />
+        <ValidationSummary />
 
         <div class="form-field">
             <label>Name:</label>
@@ -20,23 +21,23 @@
         </div>
 
         <div class="form-field">
-            <label>Mneumonic:</label>
+            <label>Description:</label>
             <div>
-                <InputText @bind-Value="newDinner.mneumonic" />
+                <InputText @bind-Value="newDinner.description" />
             </div>
         </div>
 
         <div class="form-field">
             <label>Method:</label>
             <div>
-                <InputText @bind-Value="newDinner.method" />
+                <InputTextArea @bind-Value="newDinner.method" />
             </div>
         </div>
 
         <div class="form-field">
             <label>Notes:</label>
             <div>
-                <InputText @bind-Value="newDinner.notes" />
+                <InputTextArea @bind-Value="newDinner.notes" />
             </div>
         </div>
 
@@ -49,12 +50,17 @@
                 @category.name
             }
 
+            <div>
+                <label>New Category Name:</label>
+                <InputText @bind-Value="newCategoryName" />
+                <button type="button" @onclick="AddCategory">Add Category</button>
+            </div>
         </div>
-
 
         <button type="Submit">
             Add dinner
         </button>
+
     </EditForm>
     @if (!string.IsNullOrEmpty(errorMessage))
     {
@@ -66,13 +72,12 @@
     private EditContext editContext;
     private Dinner newDinner = new Dinner();
     private List<Category> categories = new List<Category>();
-
+    private string newCategoryName;
     private string errorMessage;
-    private bool temp;
 
     protected override async Task OnInitializedAsync()
     {
-        categories = await HttpClient.GetFromJsonAsync<List<Category>>(NavigationManager.BaseUri + "dinners/getcategories");
+        await LoadCategories();
     }
 
     protected override void OnInitialized()
@@ -82,9 +87,43 @@
         base.OnInitialized();
     }
 
+    private async Task LoadCategories()
+    {
+        categories = await HttpClient.GetFromJsonAsync<List<Category>>(NavigationManager.BaseUri + "dinners/getcategories");
+    }
+
+    private async Task AddCategory()
+    {
+        if (!string.IsNullOrWhiteSpace(newCategoryName))
+        {
+            // Create a new category with the provided name
+            var newCategory = new Category { name = newCategoryName, selected = false };
+            var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}dinners/addcategory", newCategory);
+            if (!response.IsSuccessStatusCode)
+            {
+                // Handle error
+                errorMessage = "ERROR: Failed to add category. Response: " + await response.Content.ReadAsStringAsync();
+            }
+
+            // Reload categories
+            await LoadCategories();
+        }
+    }
+
     private async Task Add()
     {
-        var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}dinners", newDinner);
+        // Add selected categories to the dinner
+        List<Category> dinner_categories = new();
+        foreach (var category in categories)
+        {
+            if (category.selected)
+            {
+                dinner_categories.Add(category);
+            }
+        }
+        newDinner.categories = dinner_categories;
+
+        var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}dinners/adddinner", newDinner);
 
         if (response.IsSuccessStatusCode)
         {

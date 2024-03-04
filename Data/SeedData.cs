@@ -7,10 +7,13 @@ namespace DinnerMe.Data
     {
         public static void Initialize(DinnerMeContext db) {
 
+            var fish_category = new Category() { name = "Fish" };
+            var italian_category = new Category() { name = "Italian" };
+
             var dinners = new Dinner[] {
                 new Dinner() {
                     name        = "Barramundi Foil Parcels",
-                    mneumonic   = "Can steam forever",
+                    description   = "Can steam forever",
                     imageUrl    = "img/default_meal.jpg",
                     method      = "1. Feck it all in a bit of tin foil\n2. Feckin' cook it, like.\n3. Sure that's it now Ted.",
                     notes       = "Yummy scrummy in my tummy.",
@@ -23,14 +26,14 @@ namespace DinnerMe.Data
                                            quantity = 1 }
                     }.ToList<Ingredient>(),
                     categories = new Category[] {
-                        new Category() { name = "Fish" },
-                        new Category() { name = "Italian"}
+                        fish_category,
+                        italian_category
                     }.ToList<Category>()
                     // Note: No sides
                 },
                 new Dinner() {
                     name        = "Big Dirty Fry-up",
-                    mneumonic   = "Greasy as",
+                    description   = "Greasy as",
                     imageUrl    = "img/default_meal.jpg",
                     method      = "1. Chuck it all on the bbq.\n2. Get stuck in.",
                     notes       = "Must check if this can be null...",
@@ -42,12 +45,12 @@ namespace DinnerMe.Data
                                            imageUrl = "img/ingredients/default.jpg",
                                            quantity = 1 }
                     }.ToList<Ingredient>(),
-                    categories = new Category[] { new Category() { name = "Fish" } }.ToList<Category>()
+                    categories = new Category[] { fish_category }.ToList<Category>()
                     // Note: No sides
                 },
                 new Dinner() {
                     name = "Trucha Patagonica",
-                    mneumonic = "Salmon in rosti",
+                    description = "Salmon in rosti",
                     imageUrl = "img/default_meal.jpg",
                     method = "1. Make rosti\n2.Make rosti sandwich with salmon & rocket filling\n3.Servido!",
                     notes = "Can use spinach instead of rocket or even better use a spinach/rocket mix",
@@ -59,7 +62,7 @@ namespace DinnerMe.Data
                                            imageUrl = "img/ingredients/default.jpg",
                                            quantity = 5 }
                     }.ToList<Ingredient>(),
-                    categories = new Category[] { new Category() { name = "Fish" } }.ToList<Category>(),
+                    categories = new Category[] { fish_category }.ToList<Category>(),
                     sides = new Side[] {
                         new Side() { name = "Stuffed Green Olives",
                                      imageUrl = "img/default_meal.jpg",

@@ -43,7 +43,7 @@ namespace DinnerMe.Controllers
             return (await dinnerMeContext.categories.ToListAsync()).OrderByDescending(c => c.name).ToList();
         }
 
-        [HttpPost]
+        [HttpPost("adddinner")]
         public async Task<ActionResult<int>> AddDinner(Dinner dinner)
         {
             dinnerMeContext.dinners.Attach(dinner);
@@ -51,6 +51,16 @@ namespace DinnerMe.Controllers
 
             return dinner.Id;
         }
+
+        [HttpPost("addcategory")]
+        public async Task<ActionResult<int>> AddCategory(Category category)
+        {
+            dinnerMeContext.categories.Attach(category);
+            await dinnerMeContext.SaveChangesAsync();
+
+            return category.Id;
+        }
+
     }
 
 }

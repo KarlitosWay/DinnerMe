@@ -5,7 +5,6 @@
 
 @using DinnerMe.Model
 
-
 <h3>Add Dinner</h3>
 
 <div>
@@ -41,6 +40,53 @@
             </div>
         </div>
 
+        <div class="form-field">
+            <label>Add ingredient:</label>
+            <div>
+                <InputText @bind-Value="searchIngredient" @oninput="SearchIngredients" />
+                @if (matchingIngredients != null && matchingIngredients.Any())
+                {
+                    <ul>
+                        @foreach (var ingredient in matchingIngredients)
+                        {
+                            <li style="list-style-type: none;">
+                                <span style="cursor:pointer" @onclick="() => AddDinnerIngredient(ingredient)">
+                                    <strong>+</strong> @ingredient.name
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <div>
+            <label>Added Ingredients:</label>
+            <ul>
+                @foreach (var mealIngredient in newDinner.ingredients)
+                {
+                    <li>@mealIngredient.ingredient.name</li>
+                }
+            </ul>
+        </div>
+
+        <div class="form-field">
+            <label>New Ingredient Name:</label>
+            <InputText @bind-Value="newIngredientName" />
+        </div>
+
+        <div class="form-field">
+            <label>Measurement Type:</label>
+            <select @bind="newIngredientMeasurement">
+                @foreach (var measurementType in Enum.GetValues(typeof(Ingredient.UnitOfMeasurement)))
+                {
+                    <option value="@measurementType">@measurementType.ToString()</option>
+                }
+            </select>
+        </div>
+
+        <button type="button" @onclick="CreateIngredient">Create Ingredient</button>
+
         <div class="form-group">
             <label for="body">Select categories: </label>
 
@@ -71,13 +117,65 @@
 @code {
     private EditContext editContext;
     private Dinner newDinner = new Dinner();
-    private List<Category> categories = new List<Category>();
+    private List<Category> categories = new();
     private string newCategoryName;
     private string errorMessage;
+
+    private string searchIngredient;
+    private List<Ingredient> matchingIngredients = new List<Ingredient>();
+
+    private string newIngredientName;
+    private Ingredient.UnitOfMeasurement newIngredientMeasurement;
+
+    private List<Ingredient> ingredients;
+
+    private async Task CreateIngredient()
+    {
+        if (!string.IsNullOrWhiteSpace(newIngredientName))
+        {
+            var newIngredient = new Ingredient { name = newIngredientName, measurement = newIngredientMeasurement };
+            var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}dinners/addingredient", newIngredient);
+            if (!response.IsSuccessStatusCode)
+            {
+                // Handle error
+                errorMessage = "ERROR: Failed to add ingredient. Response: " + await response.Content.ReadAsStringAsync();
+            }
+
+            // Reload ingredients
+            await LoadIngredients();
+
+
+            // Clear the fields after creating the ingredient
+            newIngredientName = string.Empty;
+            newIngredientMeasurement = Ingredient.UnitOfMeasurement.Whole;
+        }
+    }
+
+    private async Task SearchIngredients(ChangeEventArgs e)
+    {
+        string searchTerm = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            matchingIngredients = ingredients.Where(i => i.name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+        else
+        {
+            matchingIngredients.Clear();
+        }
+    }
+
+    private void AddDinnerIngredient(Ingredient ingredient)
+    {
+        // Add the selected ingredient to the dinner's list of ingredients
+        //newDinner.ingredients.Add(ingredient);
+        searchIngredient = string.Empty; // Clear the input field after selecting an ingredient
+        matchingIngredients.Clear(); // Clear the matching ingredients list
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await LoadCategories();
+        await LoadIngredients();
     }
 
     protected override void OnInitialized()
@@ -90,6 +188,11 @@
     private async Task LoadCategories()
     {
         categories = await HttpClient.GetFromJsonAsync<List<Category>>(NavigationManager.BaseUri + "dinners/getcategories");
+    }
+
+    private async Task LoadIngredients()
+    {
+        ingredients = await HttpClient.GetFromJsonAsync<List<Ingredient>>(NavigationManager.BaseUri + "dinners/getingredients");
     }
 
     private async Task AddCategory()
@@ -107,6 +210,8 @@
 
             // Reload categories
             await LoadCategories();
+
+            newCategoryName = string.Empty; // Clear the input field after adding the category
         }
     }
 

@@ -6,6 +6,9 @@ namespace DinnerMe.Model
     abstract public class Meal
     {
 
+        // Unique identifier for the instance, required by the ORM (EntityFramework) / database
+        public int Id { get; set; }
+
         [Required,
             MinLength(3, ErrorMessage = "Please use a Name bigger than 3 letters."),
             MaxLength(30, ErrorMessage = "Please use a Name less than 30 letters.")]
@@ -25,7 +28,7 @@ namespace DinnerMe.Model
         public string notes { get; set; }
 
         // A meal can have one or more ingredients
-        public List<Ingredient> ingredients { get; set; } = new List<Ingredient>();
+        public List<MealIngredient> ingredients { get; set; } = new();
 
     }
 }

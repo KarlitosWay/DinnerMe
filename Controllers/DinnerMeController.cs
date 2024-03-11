@@ -37,12 +37,6 @@ namespace DinnerMe.Controllers
             //return (await _db.dinners.Include(d => d.sides).Include(d => d.ingredients).ToListAsync()).OrderByDescending(d => d.name).ToList();
         }
 
-        [HttpGet("getcategories")]
-        public async Task<ActionResult<List<Category>>> GetCategories()
-        {
-            return (await dinnerMeContext.categories.ToListAsync()).OrderByDescending(c => c.name).ToList();
-        }
-
         [HttpPost("adddinner")]
         public async Task<ActionResult<int>> AddDinner(Dinner dinner)
         {
@@ -52,6 +46,12 @@ namespace DinnerMe.Controllers
             return dinner.Id;
         }
 
+        [HttpGet("getcategories")]
+        public async Task<ActionResult<List<Category>>> GetCategories()
+        {
+            return (await dinnerMeContext.categories.ToListAsync()).OrderByDescending(c => c.name).ToList();
+        }
+
         [HttpPost("addcategory")]
         public async Task<ActionResult<int>> AddCategory(Category category)
         {
@@ -59,6 +59,21 @@ namespace DinnerMe.Controllers
             await dinnerMeContext.SaveChangesAsync();
 
             return category.Id;
+        }
+
+        [HttpGet("getingredients")]
+        public async Task<ActionResult<List<Ingredient>>> GetIngredients()
+        {
+            return (await dinnerMeContext.ingredients.ToListAsync()).OrderByDescending(c => c.name).ToList();
+        }
+
+        [HttpPost("addingredient")]
+        public async Task<ActionResult<int>> AddIngredient(Ingredient ingredient)
+        {
+            dinnerMeContext.ingredients.Attach(ingredient);
+            await dinnerMeContext.SaveChangesAsync();
+
+            return ingredient.Id;
         }
 
     }

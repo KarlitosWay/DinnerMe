@@ -2,16 +2,24 @@
 {
     public class Ingredient
     {
+        public enum UnitOfMeasurement {
+            Whole, // If we're using whole numbers, e.g. 3 x apples
+            Millilitres,
+            Litres,
+            Grammes,
+            Kilos,
+            Can,
+            Jar
+        }
 
         // Unique identifier for the instance, required by the ORM (EntityFramework) / database
         public int Id { get; set; }
 
         public string name { get; set; }
 
-        public string imageUrl { get; set; }
+        public UnitOfMeasurement measurement { get; set; }
 
-        // TODO, need to support different quantity types, e.g. 3 x tomatoes, 100g butter, 1 litre milk...
-        public int quantity { get; set; }
+        public string imageUrl { get; set; }
 
         // Every ingredient can be associated with zero or more dinners
         public List<Dinner> dinners { get; } = new List<Dinner>();

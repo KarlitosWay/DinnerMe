@@ -76,6 +76,12 @@ namespace DinnerMe.Controllers
             return ingredient.Id;
         }
 
+        [HttpGet("getsides")]
+        public async Task<ActionResult<List<Side>>> GetSides()
+        {
+            return (await dinnerMeContext.sides.ToListAsync()).OrderByDescending(c => c.name).ToList();
+        }
+
     }
 
 }

@@ -1,11 +1,11 @@
-﻿@page "/adddinner"
+﻿@page "/addmeal/{mealtype}"
 
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 
 @using DinnerMe.Model
 
-<h3>Add Dinner</h3>
+<h3>Add @(MealType == "dinner" ? "Dinner" : "Side")</h3>
 
 <div>
     <EditForm EditContext=@editContext OnValidSubmit=Add>
@@ -15,28 +15,28 @@
         <div class="form-field">
             <label>Name:</label>
             <div>
-                <InputText @bind-Value="newDinner.name" />
+                <InputText @bind-Value="newMeal.name" />
             </div>
         </div>
 
         <div class="form-field">
             <label>Description:</label>
             <div>
-                <InputText @bind-Value="newDinner.description" />
+                <InputText @bind-Value="newMeal.description" />
             </div>
         </div>
 
         <div class="form-field">
             <label>Method:</label>
             <div>
-                <InputTextArea @bind-Value="newDinner.method" />
+                <InputTextArea @bind-Value="newMeal.method" />
             </div>
         </div>
 
         <div class="form-field">
             <label>Notes:</label>
             <div>
-                <InputTextArea @bind-Value="newDinner.notes" />
+                <InputTextArea @bind-Value="newMeal.notes" />
             </div>
         </div>
 
@@ -67,18 +67,18 @@
             </div>
         </div>
 
-        @if (newDinner.ingredients.Any())
+        @if (newMeal.ingredients.Any())
         {
             <div>
                 <label>Added Ingredients:</label>
                 <ul>
-                    @foreach (var mealIngredient in newDinner.ingredients)
+                    @foreach (var mealIngredient in newMeal.ingredients)
                     {
                         string measurement = "";
                         // If we're using a unit of measurement other than Quantity (whole numbers), display the unit
                         if (mealIngredient.ingredient.measurement != Ingredient.UnitOfMeasurement.Quantity)
                        {
-                            measurement = $" - {mealIngredient.ingredient.measurement}";
+                            measurement = $" {mealIngredient.ingredient.measurement}";
                             // Trim the plural 's' character if quantity is one
                             if (mealIngredient.quantity == 1)
                             {
@@ -124,6 +124,49 @@
             </div>
         </div>
 
+        <!-- Add optional sides if this is a dinner -->
+        @if (MealType == "dinner")
+        {
+            <div>
+                <div>
+                    <div>
+                        <label>Add Side:</label>
+                        <InputText @bind-Value="searchSideName" @oninput="SearchSides" />
+                        @if (selectedSide != null && !string.IsNullOrEmpty(selectedSide.name))
+                        {
+                            <button type="button" @onclick="AddSelectedSide">Add Side</button>
+                        }
+                    </div>
+                    @if (matchingSides != null && matchingSides.Any())
+                    {
+                        <ul>
+                            @foreach (var side in matchingSides)
+                            {
+                                <li style="list-style-type: none;">
+                                    <span style="cursor:pointer" @onclick="() => SelectSide(side)">
+                                        <strong>+</strong> @side.name
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+
+            @if (newMeal is Dinner dinner && dinner.sides.Any())
+            {
+                <div>
+                    <label>Added Sides:</label>
+                    <ul>
+                        @foreach (var side in dinner.sides)
+                        {
+                            <li>@side.name</li>
+                        }
+                    </ul>
+                </div>
+            }
+        }
+
         <button type="Submit">
             Add dinner
         </button>
@@ -136,23 +179,80 @@
 </div>
 
 @code {
+    [Parameter]
+    public string MealType { get; set; } // "dinner" or "side"
+
     private EditContext editContext;
-    private Dinner newDinner = new Dinner();
+    private string errorMessage;
+
+    // Set in OnInitialized() depending on MealType
+    private Meal newMeal;
+
+    // Category variables
     private List<Category> categories = new();
     private string newCategoryName;
-    private string errorMessage;
+
+    // Ingredient variables
+    private List<Ingredient> ingredients;
 
     private string searchIngredientName;
     private Ingredient selectedIngredient;
     private string selectedIngredientMeasurement;
-    private List<Ingredient> matchingIngredients = new List<Ingredient>();
+    private List<Ingredient> matchingIngredients = new();
 
     private string newIngredientName;
     private Ingredient.UnitOfMeasurement newIngredientMeasurement;
 
-    private List<Ingredient> ingredients;
-
     private decimal? ingredientQuantity = null;
+
+    // Side variables
+    private List<Side> sides;
+    private string searchSideName;
+    private Side selectedSide;
+    private List<Side> matchingSides = new();
+
+    protected override void OnInitialized()
+    {
+        // Meal is either a dinner or a side depending on the MealType
+        if (MealType == "dinner")
+        {
+            newMeal = new Dinner();
+        }
+        else if (MealType == "side")
+        {
+            newMeal = new Side();
+        }
+        else
+        {
+            errorMessage = $"ERROR: Programming error, unexpected MealType: {MealType}";
+        }
+
+        editContext = new EditContext(newMeal);
+
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+        await LoadIngredients();
+        await LoadSides();
+    }
+
+    private async Task LoadCategories()
+    {
+        categories = await HttpClient.GetFromJsonAsync<List<Category>>(NavigationManager.BaseUri + "dinners/getcategories");
+    }
+
+    private async Task LoadIngredients()
+    {
+        ingredients = await HttpClient.GetFromJsonAsync<List<Ingredient>>(NavigationManager.BaseUri + "dinners/getingredients");
+    }
+
+    private async Task LoadSides()
+    {
+        sides = await HttpClient.GetFromJsonAsync<List<Side>>(NavigationManager.BaseUri + "dinners/getsides");
+    }
 
     private async Task CreateIngredient()
     {
@@ -207,7 +307,7 @@
                     ingredient = selectedIngredient,
                     quantity = (decimal)ingredientQuantity
                 };
-            newDinner.ingredients.Add(mealIngredient);
+            newMeal.ingredients.Add(mealIngredient);
             searchIngredientName = string.Empty; // Clear the search ingredient field after adding
             ingredientQuantity = null; // Clear the quantity field after adding
             selectedIngredient = null; // Clear the selected ingredient
@@ -215,27 +315,44 @@
         }
     }
 
-    protected override async Task OnInitializedAsync()
+    private async Task SearchSides(ChangeEventArgs e)
     {
-        await LoadCategories();
-        await LoadIngredients();
+        string searchTerm = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            matchingSides = sides.Where(i => i.name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+        else
+        {
+            matchingSides.Clear();
+        }
     }
 
-    protected override void OnInitialized()
+    private void SelectSide(Side side)
     {
-        editContext = new EditContext(newDinner);
-
-        base.OnInitialized();
+        selectedSide = side;
+        // We set this so that the search field is populated with the selected side
+        searchSideName = selectedSide.name;
     }
 
-    private async Task LoadCategories()
+    private void AddSelectedSide()
     {
-        categories = await HttpClient.GetFromJsonAsync<List<Category>>(NavigationManager.BaseUri + "dinners/getcategories");
-    }
-
-    private async Task LoadIngredients()
-    {
-        ingredients = await HttpClient.GetFromJsonAsync<List<Ingredient>>(NavigationManager.BaseUri + "dinners/getingredients");
+        // Could use either searchSideName or selectedSide.name here
+        if (!string.IsNullOrEmpty(searchSideName))
+        {
+            Dinner newDinner = newMeal as Dinner;
+            if (newDinner != null)
+            {
+                newDinner.sides.Add(selectedSide);
+                searchSideName = string.Empty; // Clear the search side field after adding
+                selectedSide = null; // Clear the selected side
+                matchingSides.Clear(); // Matching sides should now be cleared
+            }
+            else
+            {
+                errorMessage = $"ERROR: Programming error, expected Dinner object.";
+            }
+        }
     }
 
     private async Task AddCategory()
@@ -260,18 +377,18 @@
 
     private async Task Add()
     {
-        // Add selected categories to the dinner
-        List<Category> dinner_categories = new();
+        // Add selected categories to the meal
+        List<Category> meal_categories = new();
         foreach (var category in categories)
         {
             if (category.selected)
             {
-                dinner_categories.Add(category);
+                meal_categories.Add(category);
             }
         }
-        newDinner.categories = dinner_categories;
+        newMeal.categories = meal_categories;
 
-        var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}dinners/adddinner", newDinner);
+        var response = await HttpClient.PostAsJsonAsync($"{NavigationManager.BaseUri}dinners/adddinner", newMeal);
 
         if (response.IsSuccessStatusCode)
         {
@@ -280,7 +397,7 @@
         else
         {
             // Handle error
-            errorMessage = "ERROR: Failed to add dinner. Response: " + await response.Content.ReadAsStringAsync();
+            errorMessage = $"ERROR: Failed to add {MealType}. Response: {await response.Content.ReadAsStringAsync()}";
         }
     }
 }

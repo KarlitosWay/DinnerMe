@@ -40,20 +40,26 @@
             </div>
         </div>
 
-        <div class="form-field">
-            <label>Add ingredient:</label>
+        <div>
             <div>
-                <InputText @bind-Value="searchIngredient" @oninput="SearchIngredients" />
+                <div>
+                    <label>Add ingredient:</label>
+                    <InputText @bind-Value="searchIngredientName" @oninput="SearchIngredients" />
+                    @if (selectedIngredient != null && !string.IsNullOrEmpty(selectedIngredient.name))
+                    {
+                        <input type="number" step="any" min="0" placeholder=@selectedIngredientMeasurement @bind="ingredientQuantity" />
+                        <button type="button" @onclick="AddSelectedIngredient">Add Ingredient</button>
+                    }
+                </div>
                 @if (matchingIngredients != null && matchingIngredients.Any())
                 {
                     <ul>
                         @foreach (var ingredient in matchingIngredients)
                         {
                             <li style="list-style-type: none;">
-                                <span style="cursor:pointer" @onclick="() => AddDinnerIngredient(ingredient)">
+                                <span style="cursor:pointer" @onclick="() => SelectIngredient(ingredient)">
                                     <strong>+</strong> @ingredient.name
                                 </span>
-                                <input type="number" step="any" min="0" placeholder="Quantity" @bind="ingredientQuantity" />
                             </li>
                         }
                     </ul>
@@ -66,7 +72,18 @@
             <ul>
                 @foreach (var mealIngredient in newDinner.ingredients)
                 {
-                    <li>@mealIngredient.ingredient.name - @mealIngredient.quantity</li>
+                    string measurement = "";
+                    // If we're using a unit of measurement other than Quantity (whole numbers), display the unit
+                    if (mealIngredient.ingredient.measurement != Ingredient.UnitOfMeasurement.Quantity)
+                    {
+                        measurement = $" - {mealIngredient.ingredient.measurement}";
+                        // Trim the plural 's' character if quantity is one
+                        if (mealIngredient.quantity == 1)
+                        {
+                            measurement = measurement.Substring(0, measurement.Length - 1);
+                        }
+                    }
+                    <li>@mealIngredient.ingredient.name - @mealIngredient.quantity @measurement</li>
                 }
             </ul>
         </div>
@@ -100,7 +117,7 @@
             <div>
                 <label>New Category Name:</label>
                 <InputText @bind-Value="newCategoryName" />
-                <button type="button" @onclick="AddCategory">Add Category</button>
+                <button type="button" @onclick="AddCategory">Create Category</button>
             </div>
         </div>
 
@@ -122,7 +139,9 @@
     private string newCategoryName;
     private string errorMessage;
 
-    private string searchIngredient;
+    private string searchIngredientName;
+    private Ingredient selectedIngredient;
+    private string selectedIngredientMeasurement;
     private List<Ingredient> matchingIngredients = new List<Ingredient>();
 
     private string newIngredientName;
@@ -130,7 +149,7 @@
 
     private List<Ingredient> ingredients;
 
-    private string ingredientQuantity;
+    private decimal? ingredientQuantity = null;
 
     private async Task CreateIngredient()
     {
@@ -150,7 +169,7 @@
 
             // Clear the fields after creating the ingredient
             newIngredientName = string.Empty;
-            newIngredientMeasurement = Ingredient.UnitOfMeasurement.Whole;
+            newIngredientMeasurement = Ingredient.UnitOfMeasurement.Quantity;
         }
     }
 
@@ -167,17 +186,30 @@
         }
     }
 
-    private void AddDinnerIngredient(Ingredient ingredient)
+    private void SelectIngredient(Ingredient ingredient)
     {
-        // Add the selected ingredient to the dinner's list of ingredients
-        var mealIngredient = new MealIngredient
-            {
-                ingredient = ingredient,
-                quantity = ingredientQuantity
-            };
-        newDinner.ingredients.Add(mealIngredient);
-        searchIngredient = string.Empty; // Clear the input field after selecting an ingredient
-        matchingIngredients.Clear(); // Clear the matching ingredients list
+        selectedIngredient = ingredient;
+        selectedIngredientMeasurement = ingredient.measurement.ToString();
+        // We set this so that the search field is populated with the selected ingredient
+        searchIngredientName = selectedIngredient.name;
+    }
+
+    private void AddSelectedIngredient()
+    {
+        // Could use either searchIngredientName or selectedIngredient.name here
+        if (!string.IsNullOrEmpty(searchIngredientName) && ingredientQuantity.HasValue)
+        {
+            var mealIngredient = new MealIngredient
+                {
+                    ingredient = selectedIngredient,
+                    quantity = (decimal)ingredientQuantity
+                };
+            newDinner.ingredients.Add(mealIngredient);
+            searchIngredientName = string.Empty; // Clear the search ingredient field after adding
+            ingredientQuantity = null; // Clear the quantity field after adding
+            selectedIngredient = null; // Clear the selected ingredient
+            matchingIngredients.Clear(); // Matching ingredients should now be cleared
+        }
     }
 
     protected override async Task OnInitializedAsync()

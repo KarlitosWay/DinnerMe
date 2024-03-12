@@ -9,7 +9,7 @@
         public int Id { get; set; } // Primary key
         public Meal meal { get; set; }
         public Ingredient ingredient { get; set; }
-        public string quantity { get; set; }
+        public decimal quantity { get; set; }
     }
 
 }

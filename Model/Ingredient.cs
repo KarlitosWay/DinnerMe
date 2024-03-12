@@ -3,13 +3,13 @@
     public class Ingredient
     {
         public enum UnitOfMeasurement {
-            Whole, // If we're using whole numbers, e.g. 3 x apples
+            Quantity, // If we're using whole numbers, e.g. 3 x apples
             Millilitres,
             Litres,
             Grammes,
-            Kilos,
-            Can,
-            Jar
+            Cans,
+            Jars,
+            Tubs
         }
 
         // Unique identifier for the instance, required by the ORM (EntityFramework) / database

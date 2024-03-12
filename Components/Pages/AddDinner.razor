@@ -43,7 +43,7 @@
         <div>
             <div>
                 <div>
-                    <label>Add ingredient:</label>
+                    <label>Add Ingredient:</label>
                     <InputText @bind-Value="searchIngredientName" @oninput="SearchIngredients" />
                     @if (selectedIngredient != null && !string.IsNullOrEmpty(selectedIngredient.name))
                     {
@@ -67,26 +67,29 @@
             </div>
         </div>
 
-        <div>
-            <label>Added Ingredients:</label>
-            <ul>
-                @foreach (var mealIngredient in newDinner.ingredients)
-                {
-                    string measurement = "";
-                    // If we're using a unit of measurement other than Quantity (whole numbers), display the unit
-                    if (mealIngredient.ingredient.measurement != Ingredient.UnitOfMeasurement.Quantity)
+        @if (newDinner.ingredients.Any())
+        {
+            <div>
+                <label>Added Ingredients:</label>
+                <ul>
+                    @foreach (var mealIngredient in newDinner.ingredients)
                     {
-                        measurement = $" - {mealIngredient.ingredient.measurement}";
-                        // Trim the plural 's' character if quantity is one
-                        if (mealIngredient.quantity == 1)
-                        {
-                            measurement = measurement.Substring(0, measurement.Length - 1);
+                        string measurement = "";
+                        // If we're using a unit of measurement other than Quantity (whole numbers), display the unit
+                        if (mealIngredient.ingredient.measurement != Ingredient.UnitOfMeasurement.Quantity)
+                       {
+                            measurement = $" - {mealIngredient.ingredient.measurement}";
+                            // Trim the plural 's' character if quantity is one
+                            if (mealIngredient.quantity == 1)
+                            {
+                                measurement = measurement.Substring(0, measurement.Length - 1);
+                            }
                         }
+                        <li>@mealIngredient.ingredient.name - @mealIngredient.quantity @measurement</li>
                     }
-                    <li>@mealIngredient.ingredient.name - @mealIngredient.quantity @measurement</li>
-                }
-            </ul>
-        </div>
+                </ul>
+            </div>
+        }
 
         <div class="form-field">
             <label>New Ingredient Name:</label>

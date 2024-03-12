@@ -30,5 +30,8 @@ namespace DinnerMe.Model
         // A meal can have one or more ingredients
         public List<MealIngredient> ingredients { get; set; } = new();
 
+        // Every meal can have one or more categories
+        public List<Category> categories { get; set; } = new List<Category>();
+
     }
 }

@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /SQLiteDB/dinnerme.db-shm
 /SQLiteDB/dinnerme.db-wal
+/SQLiteDB/dinnerme.db
